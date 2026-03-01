@@ -1,0 +1,49 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Error Handling Test - Radical Red Dex</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <div id="app">
+        <h1 style="color: #fff; padding: 20px;">Error Handling Test</h1>
+        <div style="padding: 20px;">
+            <button id="testError" style="padding: 10px 20px; background: #ff0000; color: #fff; border: none; cursor: pointer; border-radius: 4px;">
+                Test Error Display
+            </button>
+            <button id="testDataLoad" style="padding: 10px 20px; background: #ff0000; color: #fff; border: none; cursor: pointer; border-radius: 4px; margin-left: 10px;">
+                Test Data Load Error
+            </button>
+        </div>
+    </div>
+    <script src="script.js"></script>
+    <script>
+        // Test error display functionality
+        document.getElementById('testError').addEventListener('click', () => {
+            UIUtils.showError('This is a test error message. It should auto-dismiss after 10 seconds.');
+        });
+
+        // Test data loading error handling
+        document.getElementById('testDataLoad').addEventListener('click', async () => {
+            // Temporarily modify fetch to simulate failure
+            const originalFetch = window.fetch;
+            window.fetch = () => Promise.reject(new Error('Simulated network error'));
+            
+            try {
+                await DataManager.loadAllData();
+            } catch (error) {
+                console.log('Error caught as expected:', error);
+            }
+            
+            // Restore original fetch
+            window.fetch = originalFetch;
+        });
+
+        console.log('Error handling test page loaded');
+        console.log('UIUtils available:', typeof UIUtils !== 'undefined');
+        console.log('DataManager available:', typeof DataManager !== 'undefined');
+    </script>
+</body>
+</html>

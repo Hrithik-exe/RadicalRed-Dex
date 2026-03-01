@@ -1,0 +1,280 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Test: Application Initialization</title>
+    <style>
+        body {
+            font-family: system-ui, -apple-system, sans-serif;
+            padding: 2rem;
+            background: #111;
+            color: #ccc;
+        }
+        h1 { color: #ff0000; }
+        .test-section {
+            margin: 2rem 0;
+            padding: 1rem;
+            background: #222;
+            border-radius: 8px;
+        }
+        .test-result {
+            padding: 0.5rem;
+            margin: 0.5rem 0;
+            border-radius: 4px;
+        }
+        .pass { background: #2d5016; color: #7bc043; }
+        .fail { background: #5c1a1a; color: #ff6b6b; }
+        button {
+            background: #ff0000;
+            color: white;
+            border: none;
+            padding: 0.75rem 1.5rem;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 1rem;
+            margin: 0.5rem;
+        }
+        button:hover { background: #cc0000; }
+    </style>
+</head>
+<body>
+    <h1>Application Initialization Test</h1>
+    
+    <div class="test-section">
+        <h2>Test: App Initialization</h2>
+        <p>This test verifies that the application initializes correctly with all components.</p>
+        <button onclick="runInitializationTest()">Run Test</button>
+        <div id="init-results"></div>
+    </div>
+
+    <div class="test-section">
+        <h2>Test: Loading State Display</h2>
+        <p>This test verifies that the loading state is displayed during initialization.</p>
+        <button onclick="runLoadingStateTest()">Run Test</button>
+        <div id="loading-results"></div>
+    </div>
+
+    <div class="test-section">
+        <h2>Test: Error Handling</h2>
+        <p>This test verifies that initialization errors are handled gracefully.</p>
+        <button onclick="runErrorHandlingTest()">Run Test</button>
+        <div id="error-results"></div>
+    </div>
+
+    <script>
+        // Mock minimal data for testing
+        const mockSpeciesData = {
+            "1": {
+                "id": "1",
+                "name": "Bulbasaur",
+                "types": ["Grass", "Poison"],
+                "baseStats": {
+                    "hp": 45,
+                    "attack": 49,
+                    "defense": 49,
+                    "spAttack": 65,
+                    "spDefense": 65,
+                    "speed": 45
+                },
+                "abilities": ["Overgrow"],
+                "evolutions": [],
+                "moves": [],
+                "sprite": null
+            }
+        };
+
+        function showResult(containerId, message, passed) {
+            const container = document.getElementById(containerId);
+            const resultDiv = document.createElement('div');
+            resultDiv.className = `test-result ${passed ? 'pass' : 'fail'}`;
+            resultDiv.textContent = `${passed ? '✓' : '✗'} ${message}`;
+            container.appendChild(resultDiv);
+        }
+
+        function clearResults(containerId) {
+            const container = document.getElementById(containerId);
+            container.innerHTML = '';
+        }
+
+        async function runInitializationTest() {
+            clearResults('init-results');
+            
+            try {
+                // Create a test app container
+                const testContainer = document.createElement('div');
+                testContainer.id = 'app';
+                document.body.appendChild(testContainer);
+
+                // Mock fetch to return test data
+                const originalFetch = window.fetch;
+                window.fetch = async (url) => {
+                    if (url.includes('species.json')) {
+                        return {
+                            ok: true,
+                            json: async () => mockSpeciesData
+                        };
+                    }
+                    return {
+                        ok: true,
+                        json: async () => ({})
+                    };
+                };
+
+                // Test that App object exists
+                if (typeof App !== 'undefined') {
+                    showResult('init-results', 'App object exists', true);
+                } else {
+                    showResult('init-results', 'App object exists', false);
+                    return;
+                }
+
+                // Test that App has init method
+                if (typeof App.init === 'function') {
+                    showResult('init-results', 'App.init method exists', true);
+                } else {
+                    showResult('init-results', 'App.init method exists', false);
+                    return;
+                }
+
+                // Test that App has showLoadingState method
+                if (typeof App.showLoadingState === 'function') {
+                    showResult('init-results', 'App.showLoadingState method exists', true);
+                } else {
+                    showResult('init-results', 'App.showLoadingState method exists', false);
+                }
+
+                // Test initialization
+                await App.init();
+
+                // Check if app is initialized
+                if (App.isInitialized) {
+                    showResult('init-results', 'App initialized successfully', true);
+                } else {
+                    showResult('init-results', 'App initialized successfully', false);
+                }
+
+                // Check if DataManager was initialized
+                if (DataManager.data.species) {
+                    showResult('init-results', 'DataManager loaded data', true);
+                } else {
+                    showResult('init-results', 'DataManager loaded data', false);
+                }
+
+                // Check if FavoritesManager was initialized
+                if (FavoritesManager.favorites instanceof Set) {
+                    showResult('init-results', 'FavoritesManager initialized', true);
+                } else {
+                    showResult('init-results', 'FavoritesManager initialized', false);
+                }
+
+                // Check if ViewManager was initialized
+                if (ViewManager.currentView) {
+                    showResult('init-results', 'ViewManager initialized', true);
+                } else {
+                    showResult('init-results', 'ViewManager initialized', false);
+                }
+
+                // Restore original fetch
+                window.fetch = originalFetch;
+
+                // Clean up
+                testContainer.remove();
+
+            } catch (error) {
+                showResult('init-results', `Error: ${error.message}`, false);
+            }
+        }
+
+        async function runLoadingStateTest() {
+            clearResults('loading-results');
+            
+            try {
+                // Create a test app container
+                const testContainer = document.createElement('div');
+                testContainer.id = 'app';
+                document.body.appendChild(testContainer);
+
+                // Call showLoadingState
+                App.showLoadingState();
+
+                // Check if loading screen was created
+                const loadingScreen = testContainer.querySelector('.loading-screen');
+                if (loadingScreen) {
+                    showResult('loading-results', 'Loading screen created', true);
+                } else {
+                    showResult('loading-results', 'Loading screen created', false);
+                }
+
+                // Check if loading spinner exists
+                const spinner = testContainer.querySelector('.loading-spinner');
+                if (spinner) {
+                    showResult('loading-results', 'Loading spinner exists', true);
+                } else {
+                    showResult('loading-results', 'Loading spinner exists', false);
+                }
+
+                // Check if loading text exists
+                const loadingText = testContainer.querySelector('.loading-text');
+                if (loadingText) {
+                    showResult('loading-results', 'Loading text exists', true);
+                } else {
+                    showResult('loading-results', 'Loading text exists', false);
+                }
+
+                // Clean up
+                testContainer.remove();
+
+            } catch (error) {
+                showResult('loading-results', `Error: ${error.message}`, false);
+            }
+        }
+
+        async function runErrorHandlingTest() {
+            clearResults('error-results');
+            
+            try {
+                // Create a test app container
+                const testContainer = document.createElement('div');
+                testContainer.id = 'app';
+                document.body.appendChild(testContainer);
+
+                // Mock fetch to fail
+                const originalFetch = window.fetch;
+                window.fetch = async (url) => {
+                    throw new Error('Network error');
+                };
+
+                // Reset App state
+                App.isInitialized = false;
+                App.isLoading = false;
+
+                // Try to initialize (should handle error gracefully)
+                await App.init();
+
+                // Check that app didn't crash
+                showResult('error-results', 'App handled initialization error without crashing', true);
+
+                // Check that ViewManager still initialized
+                if (ViewManager.currentView) {
+                    showResult('error-results', 'ViewManager initialized despite data loading error', true);
+                } else {
+                    showResult('error-results', 'ViewManager initialized despite data loading error', false);
+                }
+
+                // Restore original fetch
+                window.fetch = originalFetch;
+
+                // Clean up
+                testContainer.remove();
+
+            } catch (error) {
+                showResult('error-results', `Error: ${error.message}`, false);
+            }
+        }
+    </script>
+
+    <!-- Load the actual script.js for testing -->
+    <script src="script.js"></script>
+</body>
+</html>

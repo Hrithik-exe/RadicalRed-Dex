@@ -1,0 +1,20 @@
+<svg width="192" height="192" viewBox="0 0 192 192" xmlns="http://www.w3.org/2000/svg">
+  <!-- Dark background -->
+  <rect width="192" height="192" fill="#111111"/>
+  
+  <!-- Pokéball design -->
+  <!-- Top half (red) -->
+  <path d="M 96 40 A 56 56 0 0 1 152 96 L 40 96 A 56 56 0 0 1 96 40 Z" fill="#ff0000"/>
+  
+  <!-- Bottom half (white) -->
+  <path d="M 96 152 A 56 56 0 0 0 152 96 L 40 96 A 56 56 0 0 0 96 152 Z" fill="#ffffff"/>
+  
+  <!-- Center band (black) -->
+  <rect x="40" y="88" width="112" height="16" fill="#000000"/>
+  
+  <!-- Center circle (white) -->
+  <circle cx="96" cy="96" r="20" fill="#ffffff" stroke="#000000" stroke-width="3"/>
+  
+  <!-- Center dot (black) -->
+  <circle cx="96" cy="96" r="8" fill="#000000"/>
+</svg>
